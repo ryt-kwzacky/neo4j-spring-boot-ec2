@@ -3,6 +3,8 @@ package com.example.neo4jspringbootheroku
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -15,11 +17,20 @@ class PersonController(
         private val LOGGER = LoggerFactory.getLogger(this::class.java)
     }
 
-    @GetMapping(value = ["", "/"])
-    fun getMovies(): String {
+    @GetMapping("/get")
+    fun getMovies(): List<Person.DTO> {
         LOGGER.info("test!!!!!!!!!!!!!!!!!!!!!")
-        (personRepository.findAll().map { LOGGER.info(it.name) })
-        val test = personRepository.findAll()
-        return test.first().name
+        // データの変換などアプリケーション的な手続きはユースケース層でやるようにする。
+        return personRepository.findAll().map { it.toDTO() }
+    }
+
+    @PostMapping("/post")
+    fun create(@RequestBody newPerson: Person): Person {
+        return personRepository.save(newPerson)
+    }
+
+    @PostMapping("/remove")
+    fun remove(@RequestBody id: String) {
+        return personRepository.deleteById(id)
     }
 }
